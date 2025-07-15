@@ -2,110 +2,104 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <title>職員室注文フォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>職員室注文システム</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-    h2 {
-      color: #333;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 15px; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    button { margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; }
   </style>
 </head>
 <body>
 
-  <h2>職員室注文フォーム</h2>
+<h2>職員室注文フォーム</h2>
 
-  <form id="orderForm">
-    <label>ユーザー名：
-      <input type="text" name="username" required>
-    </label>
+<form id="orderForm">
+  <label>ユーザー名（LINEから取得）：
+    <input type="text" name="username" id="username" readonly>
+  </label>
 
-    <label>商品名：
-      <select name="item" required>
-        <option value="">選択してください</option>
-        <option value="お茶">お茶</option>
-        <option value="コーヒー">コーヒー</option>
-        <option value="クッキー">クッキー</option>
-        <option value="チョコ">チョコ</option>
-      </select>
-    </label>
+  <label>商品名：
+    <select name="item" required>
+      <option value="">選択してください</option>
+      <option value="お茶">お茶</option>
+      <option value="コーヒー">コーヒー</option>
+      <option value="チョコ">チョコ</option>
+      <option value="クッキー">クッキー</option>
+    </select>
+  </label>
 
-    <label>数量：
-      <input type="number" name="quantity" min="1" value="1" required>
-    </label>
+  <label>数量：
+    <input type="number" name="quantity" min="1" value="1" required>
+  </label>
 
-    <label>職員室：
-      <select name="room" required>
-        <option value="">選択してください</option>
-        <option value="職員室">職員室</option>
-        <option value="生徒指導室">生徒指導室</option>
-        <option value="商業センター">商業センター</option>
-        <option value="進路指導室">進路指導室</option>
-      </select>
-    </label>
+  <label>職員室：
+    <select name="room" required>
+      <option value="">選択してください</option>
+      <option value="職員室">職員室</option>
+      <option value="商業センター">商業センター</option>
+      <option value="生徒指導室">生徒指導室</option>
+       <option value="進路指導室">進路指導室</option>
+      <option value="事務室">事務室</option>
+    </select>
+  </label>
 
-    <button type="submit">注文する</button>
-  </form>
+  <button type="submit">注文する</button>
+</form>
 
-  <script>
-    const scriptURL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbw52DG_DIU3PugZVkZVn9LduSm0QKAFAK43pmSlOmNK4UcbIgBfBwqf0DW6HQj3Ogbw/exec"; // 必ず置き換えてください！
+<script>
+  const liffId = "【ここにあなたのLIFF IDを貼ってください】";
+  const scriptURL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbw52DG_DIU3PugZVkZVn9LduSm0QKAFAK43pmSlOmNK4UcbIgBfBwqf0DW6HQj3Ogbw/exec
+";
 
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = new FormData(e.target);
-      const data = {
-        username: form.get('username'),
-        item: form.get('item'),
-        quantity: form.get('quantity'),
-        room: form.get('room')
-      };
-
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-      .then(() => {
-        alert('注文を受け付けました！');
-        e.target.reset();
-      })
-      .catch(() => {
-        alert('送信に失敗しました。もう一度お試しください。');
-      });
+  // LIFF初期化
+  liff.init({ liffId })
+    .then(() => {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        liff.getProfile().then(profile => {
+          document.getElementById('username').value = profile.displayName;
+        }).catch(err => {
+          alert('LINEプロフィール取得に失敗しました');
+          console.error(err);
+        });
+      }
+    })
+    .catch(err => {
+      alert('LIFF初期化エラー');
+      console.error(err);
     });
-  </script>
+
+  // フォーム送信
+  document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const data = {
+      username: form.get('username'),
+      item: form.get('item'),
+      quantity: form.get('quantity'),
+      room: form.get('room')
+    };
+
+    fetch(scriptURL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then(() => {
+      alert('注文を受け付けました！');
+      e.target.reset();
+      document.getElementById('username').value = data.username; // 再入力
+    })
+    .catch(() => {
+      alert('送信に失敗しました。');
+    });
+  });
+</script>
 
 </body>
 </html>
+
